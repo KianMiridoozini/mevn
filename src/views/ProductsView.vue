@@ -25,9 +25,9 @@
 
 <script setup lang="ts">
 import {onMounted } from 'vue';
-import { userProducts } from '../modules/userProducts'; 
+import { useProducts } from '../modules/useProducts'; 
 
-const {loading, error, products, fetchProducts} = userProducts();
+const {loading, error, products, fetchProducts} = useProducts();
 
 onMounted(() => {
   fetchProducts();

@@ -12,6 +12,7 @@
     "lint": "eslint . --fix"
   },
   "dependencies": {
+    "dotenv": "^16.4.7",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5"
   },

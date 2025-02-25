@@ -1,8 +1,10 @@
 import { ref } from "vue";
 import type { Product } from "../interfaces/interfaces";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export const userProducts = () => {
+
+export const useProducts = () => {
   const error = ref<string | null>(null);
   const loading = ref<boolean>(false);
   const products = ref<Product[]>([]);
@@ -10,9 +12,7 @@ export const userProducts = () => {
   const fetchProducts = async (): Promise<void> => {
     loading.value = true;
     try {
-      const response = await fetch(
-        "https://ments-restapi.onrender.com/api/products"
-      );
+      const response = await fetch(`${API_BASE_URL}/products`);
       if (!response.ok) {
         throw new Error("Failed to fetch products");
       }
