@@ -1,7 +1,7 @@
 
 
 export type Product = {
-    id: string;
+    _id: string;
     name: string;
     description: string;
     imageURL: string;
@@ -10,7 +10,13 @@ export type Product = {
     discount: boolean;
     discountPct: number;
     isHidden: boolean;
+    _createdBy: string;
   }
+
+  export type newProduct = Omit<Product, "_id"> & {
+     _createdBy: string 
+    
+  };
 
   export type User = {
     id: string,

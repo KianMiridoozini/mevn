@@ -16,7 +16,7 @@ export const useUsers = () => {
 
   const fetchToken = async (email: string, password: string): Promise<void> => {
     try {
-      const response = await fetch('${API_BASE_URL}/user/login', {
+      const response = await fetch(`${API_BASE_URL}/user/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -34,7 +34,7 @@ export const useUsers = () => {
       user.value = authResponse.data.user;
       isLoggeddIn.value = true;
       localStorage.setItem("lstoken", authResponse.data.token);
-      localStorage.setItem("userIDToken", authResponse.data.userID);
+      localStorage.setItem("userIDToken", authResponse.data.userId);
       console.table("User is logged in:", authResponse);
       console.log("Token:", token.value);
     } catch (err) {
@@ -50,7 +50,7 @@ export const useUsers = () => {
     password: string
   ): Promise<void> => {
     try {
-      const response = await fetch('${API_BASE_URL}/user/register', {
+      const response = await fetch(`${API_BASE_URL}/user/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
