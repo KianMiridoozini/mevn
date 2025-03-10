@@ -72,7 +72,7 @@
         <div class="mt-4 flex space-x-2"> <!-- Update and delete buttons -->
           <p>ID: {{ product._id }} </p> <!-- Product ID for testing -->
           <button @click="deleteProduct(product._id)" class="bg-red-600 text-white p-2 rounded hover:bg-red-700">Delete</button> <!-- Delete button -->
-          <button  class="bg-green-600 text-white p-2 rounded hover:bg-green-700">Edit</button> <!-- Edit button -->
+          <button @click="updateProductHandler(product)" class="bg-green-600 text-white p-2 rounded hover:bg-green-700">Edit</button> <!-- Edit button -->
          </div>
       </div>
     </div>
@@ -86,8 +86,9 @@
 import { ref } from 'vue';
 import { onMounted } from 'vue';
 import { useProducts } from '../../modules/useProducts';
+import type { Product } from '../../interfaces/interfaces';
 
-const {products, error, loading, getTokenAndUserId , fetchProducts, deleteProduct, addProduct} = useProducts();
+const {products, error, loading, getTokenAndUserId , fetchProducts, deleteProduct, addProduct, updateProduct} = useProducts();
 
 const handleDelete = (id: string) => {
   console.log("Deleting product with id:", id); // Debugging log
@@ -117,6 +118,20 @@ const addProductHandler = async () => {
   newProduct.value = {
     ...newProduct.value,
   }
+}
+
+const updateProductHandler = async (product: Product) => {
+  const updatedProduct = {
+    name: product.name,
+    description: product.description,
+    price: product.price,
+    stock: product.stock,
+    discount: product.discount,
+    discountPct: product.discountPct,
+    isHidden: product.isHidden,
+    imageURL: product.imageURL,
+  }
+  await updateProduct(product._id, updatedProduct);
 }
 </script>
 

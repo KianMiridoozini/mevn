@@ -82,28 +82,76 @@ export const useProducts = () => {
     }
   };
 
+
+  const deleteProductFromServer = async (id: string, token: string): Promise<void> => {
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+      method: "DELETE",
+      headers: {
+        "auth-token": token,
+      },
+    });
+    if (!response.ok) {
+      console.log("Product NOT deleted", id);
+      throw new Error("Failed to delete product");
+    }
+  }
+
+  const removeProductFromState = (id: string): void => {
+    products.value = products.value.filter((product) => product._id !== id);
+    console.log("Product deleted", id);
+  }
+
   const deleteProduct = async (id: string): Promise<void> => {
     try {
-      const token = localStorage.getItem("lstoken");
-      if (!token) {
-        throw new Error("No token found");
-      }
+      const { token } = getTokenAndUserId();
+      await deleteProductFromServer(id, token);
       console.log("Deleting product with id:", id);
-      const response = await fetch(`${API_BASE_URL}/products/${id}`, {
-        method: "DELETE",
-        headers: {
-          "auth-token": token,
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Failed to delete product");
-      }
-      products.value = products.value.filter((product) => product._id !== id);
-      console.log("Product deleted", id);
+      removeProductFromState(id);
+
     } catch (err) {
       error.value = (err as Error).message;
     }
   };
+
+  const updateProductOnServer = async (id: string, updatedProduct: Partial<Product>, token: string): Promise<Product> => {
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "auth-token": token,
+      },
+      body: JSON.stringify(updatedProduct),
+    });
+    if (!response.ok) {
+      throw new Error("No product found");
+    }
+    const responseText = await response.text();
+    try {
+      return JSON.parse(responseText);
+    }
+    catch {
+      return { message: responseText } as unknown as Product;
+    }
+    // return await response.json();
+  }
+
+  const updateProductInState = (id:string, updatedProduct: Product ) => {
+    const index = products.value.findIndex((product) => product._id === id);
+    if (index !== -1) {
+      products.value[index] = updatedProduct;
+    }
+  }
+  const updateProduct = async (id: string, updatedProduct: Partial<Product>): Promise<void> => {
+    try {
+      const { token } = getTokenAndUserId();
+      const updatedProductResponse = await updateProductOnServer(id, updatedProduct, token);
+      updateProductInState(id, updatedProductResponse);
+      await fetchProducts();
+    }
+    catch (err) {
+      error.value = (err as Error).message;
+    }
+  }
 
   return {
     error,
@@ -112,6 +160,7 @@ export const useProducts = () => {
     fetchProducts,
     deleteProduct,
     addProduct,
-    getTokenAndUserId
+    getTokenAndUserId,
+    updateProduct
   };
 };
