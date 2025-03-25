@@ -25,3 +25,11 @@ export type Product = {
     password: string,
     registerDate: Date
 }
+
+export type CartItem = {
+  _id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  imageURL: string;
+}

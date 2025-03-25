@@ -8,13 +8,14 @@
         <RouterLink to="/products" class="mr-4">Products</RouterLink>
         <RouterLink to="/auth" class="mr-4">Auth</RouterLink>
         <RouterLink v-if="isLoggedIn" to="/admin" class="mr-4">Admin</RouterLink>
+        <RouterLink v-if="isLoggedIn" to="/orders" class="mr-4">Orders</RouterLink>
 
         <button v-if="isLoggedIn" @click="logout"  class="mr-4">Logout</button>
         <!-- RouterLink to products, Auth, Admin & and logout button -->
 
 
         <!-- toggle cart button -->
-
+        <button @click="toggleCart" class="mr-4">Cart</button>
 
         <!-- Routerlink to orders -->
 
@@ -26,7 +27,7 @@
   <RouterView />
 
   <!-- CartBasket component -->
-
+<CartBasket v-model:isVisible="isCartVisible" />
 
 </template>
 
@@ -35,6 +36,16 @@ import { computed } from 'vue'
 import { RouterLink, RouterView } from 'vue-router'
 import { useUsers } from './modules/auth/useUsers';
 import { state } from './modules/globalStates/state';
+
+import { ref } from 'vue';
+import CartBasket from './components/cart/CartBasketView.vue';
+
+const isCartVisible = ref(false)
+
+const toggleCart = () => {
+  isCartVisible.value = !isCartVisible.value
+}
+
 
 const { logout } = useUsers()
 const  isLoggedIn  = computed(() => state.isLoggeddIn)
