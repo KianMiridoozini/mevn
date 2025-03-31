@@ -1,27 +1,27 @@
 <template>
   <div class="p-4">
-    <h2 class="text-2xl font-bold mb-4">Checkout Section</h2>
-    <p class="text-center pt-5">Items have been order <br> You have no orders currently</p> <!-- If cart is empty -->
+    <h2  class="text-2xl font-bold mb-4">Checkout Section</h2>
+    <p v-if="cart.length === 0" class="text-center pt-5">Items have been order <br> You have no orders currently</p> <!-- If cart is empty -->
     <div> <!-- If cart is not empty -->
-      <div class="flex items-center mb-4 border-b pb-4"> <!-- Loop through the cart items -->
+      <div v-for="item in cart" :key="item._id" class="flex items-center mb-4 border-b pb-4"> <!-- Loop through the cart items -->
         <!-- First Column: Image -->
         <div class="w-1/6">
-          <img  alt="Product Image" class="w-full h-24 object-cover rounded-lg"> <!-- Product image -->
+          <img :src="item.imageURL" alt="Product Image" class="w-full h-24 object-cover rounded-lg"> <!-- Product image -->
         </div>
         <!-- Second Column: Title and Description -->
         <div class="w-2/6 px-4">
-          <p class="font-semibold"></p> <!-- Product name -->
+          <p class="font-semibold"> {{ item.name }}</p> <!-- Product name -->
          <!--  <p class="text-gray-500">{{ item.description }}</p> -->
         </div>
         <!-- Third Column: Quantity with + and - -->
         <div class="w-1/6 flex items-center">
-          <button  class="bg-orange-600 px-2">-</button> <!-- Decrease quantity -->
-          <span class="mx-2"></span> <!-- Quantity -->
-          <button class="bg-teal-600 px-2">+</button> <!-- Increase quantity -->
+          <button @click="updateQuantity(item._id, item.quantity - 1)" class="bg-orange-600 px-2">-</button> <!-- Decrease quantity -->
+          <span class="mx-2">{{ item.quantity }}</span> <!-- Quantity -->
+          <button @click="updateQuantity(item._id, item.quantity + 1)" class="bg-teal-600 px-2">+</button> <!-- Increase quantity -->
         </div>
         <!-- Fourth Column: Total Price -->
         <div class="w-1/6 text-right">
-          <p class="font-semibold">$</p> <!-- Total price of the product with .toFixed() -->
+          <p class="font-semibold">${{ cartTotalIndividualProduct(item._id).toFixed(2) }}</p> <!-- Total price of the product with .toFixed() -->
         </div>
       </div>
 
@@ -29,22 +29,22 @@
       <div class="mt-4 pt-4">
         <div class="flex justify-between mb-2">
           <p class="font-semibold">Subtotal:</p>
-          <p>$</p> <!-- Total in the cart -->
+          <p>${{ cartTotal().toFixed(2) }}</p> <!-- Total in the cart -->
         </div>
         <div class="flex justify-between mb-2">
           <p class="font-semibold">Sales Tax:</p>
-          <p>$</p>  <!-- Salestax in the cart -->
+          <p>${{ salesTax().toFixed(2) }}</p>  <!-- Salestax in the cart -->
         </div>
         <div class="flex justify-between mb-2">
           <p class="font-semibold">Coupon Code:</p>
-          <input type="text" class="border p-1 pr-2 bg-[#181818] text-right w-28" placeholder="Enter code"> <!-- Coupon code -->
+          <input type="text" class="border p-1 pr-2 bg-[#181818] text-right w-28" placeholder="Enter code" v-model="code"> <!-- Coupon code -->
            </div>
         <div class="flex justify-between mb-4">
           <p class="font-semibold">Grand Total:</p>
-          <p>$</p>  <!-- Grand total in the cart -->
+          <p>${{ grandTotal().toFixed(2) }}</p>  <!-- Grand total in the cart -->
         </div>
         <div class="flex justify-end">
-          <button class="bg-orange-600 text-white p-2 rounded hover:bg-orange-700" >Buy Now</button> <!-- Checkout button on click -->
+          <button class="bg-orange-600 text-white p-2 rounded hover:bg-orange-700" @click="handleBuyNow" >Buy Now</button> <!-- Checkout button on click -->
         </div>
       </div>
     </div>
@@ -52,6 +52,38 @@
 </template>
 
 <script setup lang="ts">
+import { useCart } from '../../modules/cart/useCart'
+import { useOrders } from '../../modules/orders/useOrders';
+import type { Order, OrderItem } from "../../interfaces/interfaces";
+
+const { cart, code, updateQuantity, cartTotal, cartTotalIndividualProduct, salesTax, grandTotal } = useCart();
+const { addOrder } = useOrders();
+const handleBuyNow = () => {
+  // Create order items from cart items
+  const orderItems: OrderItem[] = cart.value.map(item => ({
+    productId: item._id,
+    name: item.name,
+    price: item.price,
+    quantity: item.quantity,
+    imageURL: item.imageURL
+  }));
+
+  // Construct the new order
+  const newOrder: Order = {
+    _id: Date.now().toString(), // For a simple unique id
+    userId: "current-user-id",  // Replace with the actual current user's id
+    userName: "Current User",   // Replace with the actual current user's name
+    orderDate: new Date(),
+    items: orderItems,
+    total: grandTotal(),
+    status: "Processing"
+  };
+
+  // Save order and clear the cart
+  addOrder(newOrder);
+  cart.value = [];
+  localStorage.setItem("cart", JSON.stringify([]));
+};
 
 </script>
 

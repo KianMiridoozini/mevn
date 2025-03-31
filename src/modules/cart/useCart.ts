@@ -2,10 +2,12 @@ import { ref } from "vue";
 
 import type { CartItem } from "../../interfaces/interfaces";
 
+const cart = ref<CartItem[]>(
+  JSON.parse(localStorage.getItem("cart") || "[]")
+);
+
+const code = ref<string>("");
 export const useCart = () => {
-  const cart = ref<CartItem[]>(
-    JSON.parse(localStorage.getItem("cart") || "[]")
-  );
   const addToCart = (product: Omit<CartItem, "quantity">) => {
     const existingItem = cart.value.find((item) => item._id === product._id);
     if (existingItem) {
@@ -62,7 +64,7 @@ export const useCart = () => {
     return Math.round(cartTotal() * taxRates * 100) / 100;
   };
 
-  const code = ref<string>("");
+
 
   const couponCodeDiscount = (codes: string) => {
    const couponeCodeAccepted = codes === "DISCOUNT";
