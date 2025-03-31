@@ -1,11 +1,11 @@
-import { ref } from "vue";
+import { ref, watch } from "vue";
 
-import type { CartItem } from "../../interfaces/interfaces";
+import type { CartItem, OrderItems } from "../../interfaces/interfaces";
 
+const cart = ref<CartItem[]>(
+  JSON.parse(localStorage.getItem("cart") || "[]")
+);
 export const useCart = () => {
-  const cart = ref<CartItem[]>(
-    JSON.parse(localStorage.getItem("cart") || "[]")
-  );
   const addToCart = (product: Omit<CartItem, "quantity">) => {
     const existingItem = cart.value.find((item) => item._id === product._id);
     if (existingItem) {
@@ -73,6 +73,45 @@ export const useCart = () => {
     return Number(((cartTotal() + salesTax()) * couponCodeDiscount(code.value)).toFixed(2));
   }
 
+  const orders = ref<OrderItems[]>(JSON.parse(localStorage.getItem("orders") || "[]"));
+
+  watch(orders, (newOrders) => {
+    localStorage.setItem('orders', JSON.stringify(newOrders));
+  }, { deep: true })
+
+  const checkOutBuy = () => {
+    const newOrder: OrderItems = {
+      _id: `order-${orders.value.length + 1}`,
+      orderDate: new Date().toISOString(),
+      total: cartTotal(),
+      orderStatus: "Processing",
+      orderNumber: orders.value.length + 1,
+      userName: "John Doe",
+      orderLine: cart.value.map(item => ({
+        product: {
+          _id: item._id,
+          name: item.name,
+          description: '',
+          price: item.price,
+          imageURL: item.imageURL,
+          quantity: item.quantity,
+          stock: 0,
+          discount: false,
+          discountPct: 0,
+          isHidden: false,
+          _createdBy: '',
+        },
+        quantity: item.quantity,
+      })),
+    }
+    orders.value.push(newOrder);
+    cart.value = [];
+    localStorage.setItem("cart", JSON.stringify(cart.value));
+    console.log("Order placed:", orders.value);
+    localStorage.setItem("orders", JSON.stringify(orders.value));
+  }
+
+
   return {
     cart,
     addToCart,
@@ -82,6 +121,9 @@ export const useCart = () => {
     salesTax,
     code,
     grandTotal,
-    cartTotalIndividualProduct
+    cartTotalIndividualProduct,
+    checkOutBuy,
+    couponCodeDiscount,
+    orders,
   };
 };
